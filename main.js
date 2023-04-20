@@ -6,6 +6,97 @@ function getQueryParam(param) {
 }
 
 
+function viewJsonx(){
+  newWindow = window.open("data:text/json," + encodeURIComponent(jsonData),"_blank");
+}
+
+var textareaVisible = false;
+var jsonText;
+
+function viewJson(button) {
+  if (textareaVisible) {
+    document.body.removeChild(jsonText);
+    textareaVisible = false;
+    return;
+  }
+  
+  // Set flag to indicate that the textarea is visible
+  textareaVisible = true;
+  
+  // Convert the JSON object to a JSON string
+  var jsonString = JSON.stringify(jsonData, null, 2);
+  
+  // Create a new div element to contain the textarea and buttons
+  jsonText = document.createElement("div");
+  jsonText.style.position = "absolute";
+  
+  // Create a new textarea element
+  var textarea = document.createElement("textarea");
+  textarea.value = jsonString;
+  jsonText.appendChild(textarea);
+  
+  // Create a copy button next to the close button
+  var copyButton = document.createElement("button");
+  copyButton.innerText = "Copy";
+  copyButton.addEventListener("click", function() {
+    // Copy the contents of the textarea to the clipboard
+    textarea.select();
+    document.execCommand('copy');
+  });
+  jsonText.appendChild(copyButton);
+  
+  // Create a close button next to the copy button
+  var closeButton = document.createElement("button");
+  closeButton.innerText = "Close";
+  closeButton.addEventListener("click", function() {
+    // Remove the container div from the DOM
+    document.body.removeChild(jsonText);
+    
+    // Set flag to indicate that the textarea is no longer visible
+    textareaVisible = false;
+  });
+  jsonText.appendChild(closeButton);
+  
+  // Set the position of the div to the location of the button clicked
+  var buttonElement = document.getElementById(button.id);
+  jsonText.style.left = buttonElement.offsetLeft + "px";
+  jsonText.style.top = buttonElement.offsetTop + buttonElement.offsetHeight + "px";
+  
+  // Append the div to the body
+  document.body.appendChild(jsonText);
+}
+
+
+
+
+
+
+async function uploadFile(filename) {
+  var formData = new FormData();
+  //var jsonData = document.getElementById("output-textarea").value;
+  var data = new Blob([jsonData], {type: 'text/html'});
+  var filename = jsonUrl;
+  var filename = jsonUrl.substring(jsonUrl.lastIndexOf('/')+1);
+  formData.append("filename", data, filename);
+  await fetch(APIEndpoint, {
+    method: "POST", 
+    body: formData
+  }).then(res => console.log(res));
+}
+
+
+async function save_from_form(formElement){
+  let filename=document.getElementById(formElement).value;
+  await uploadFile(filename);
+}
+
+
+async function load_from_form(formElement){
+  let filename=document.getElementById(formElement).value;
+  loadNewJson(filename);
+}
+
+
 // Function to load new JSON data based on the actionUrl parameter
 function loadNewJson(actionUrl) {
   if (actionUrl) {
@@ -36,11 +127,7 @@ function loadJson(file, callback) {
   });
 }
 
-
-// Modify the loadImages function to use the actionUrl parameter if present
-function loadImages() {
-  const actionUrl = getQueryParam('actionUrl');
-  const jsonFile = actionUrl || startUrl;
+function loadImages(jsonFile) {
 
   loadJson(jsonFile, function (fetchedData) {
     jsonData = fetchedData;
@@ -53,6 +140,7 @@ function loadImages() {
             <div class="card-body">
               <h5 class="card-title editable" contentEditable="true">${item.title}</h5>
               <p class="card-text editable" contentEditable="true">${item.description || ''}</p>
+              <p class="card-text editable" contentEditable="true">${item.actionUrl || ''}</p>
               <div class="d-flex justify-content-between align-items-center">
               ${
                     item.actionUrl.endsWith('.json')
