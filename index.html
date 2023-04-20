@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gallery Editor</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  
+  <link rel="stylesheet" href="main.css">
+  
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js" 
+    integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" 
+    crossorigin="anonymous">
+  </script>
+
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  
+</head>
+<body>
+  <div class="content">
+  <div style="padding: 20px;">
+    <button class="btn btn-sm btn-outline-secondary" id="loadButton" onClick="loadNewJson(jsonFileName);">Load JSON</button>
+    <input id="jsonFileName" type="text" value="file">
+    <button class="btn btn-sm btn-outline-secondary" id="saveButton" onClick="">Save JSON</button>
+  </div>
+  <div class="row sortable" id="image-grid">
+    <!-- Images will be loaded here -->
+  </div>
+  <script>
+    startUrl ="https://carstenbund.com/gallery/paintings/image_urls.json";
+    saveUrl ="https://carstenbund.com/cgibin/gallery/save_json.py";
+  </script>
+  <script src="main.js"></script>
+  <script>
+    function initPage(){
+        var jsonFileName = document.getElementById("jsonFileName");
+        jsonFileName.value = startUrl;
+    }
+    // Load images when the document is ready
+    $(document).ready(function() {
+      loadImages();
+      initPage();
+    });
+  </script>
+  </div>
+</body>
+</html>

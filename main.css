@@ -1,0 +1,68 @@
+  <style>
+    /* Light mode styles (default) */
+    body {
+      background-color: white;
+      color: black;
+    }
+    
+
+    /* Dark mode styles */
+    @media (prefers-color-scheme: dark) {
+    
+    body {
+      background-color: #222;
+      color: white;
+    }
+    
+      /* Set background color and text color for the card in dark mode */
+      .card {
+        background-color: #333;
+        color: white;
+      }
+      
+      /* Common styles for both mobile and desktop */
+      .image-thumbnail {
+        width: 100%;
+        object-fit: cover; /* This ensures the aspect ratio of the image is maintained */
+      }
+      .card-body{
+          height: fill;
+      }
+    }
+    
+    /* Mobile styles */
+    @media (max-width: 767px) {
+      .image-thumbnail {
+        max-height: 150px; /* Change this to set the maximum height of the image on mobile */
+      }
+
+      .content{
+        padding: 20px;
+      }
+      body{
+        font-size: small;
+      }
+    }
+    
+    /* Desktop styles */
+    @media (min-width: 768px) {
+      .image-thumbnail {
+        max-height: 250px; /* Change this to set the maximum height of the image on desktop */
+      }
+      .card-custom {
+        height: 100%; /* Increase the height of cards */
+      }
+      .card-image{
+        padding-bottom: 50px;
+      }
+      #image-grid{
+          width: auto;
+      }
+      .content{
+        padding: 50px;
+      }
+      body{
+        font-size: small;
+      }
+    }
+  </style>
