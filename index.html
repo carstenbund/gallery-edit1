@@ -20,7 +20,7 @@
   <div style="padding: 20px;">
     <button class="btn btn-sm btn-outline-secondary" id="loadButton" onClick="load_from_form('jsonFileName');">Load JSON</button>
     <input id="jsonFileName" type="text" value="file">
-    <button class="btn btn-sm btn-outline-secondary" id="saveButton" onClick="">Save JSON</button>
+    <button class="btn btn-sm btn-outline-secondary" id="saveButton" onClick="save_from_form('jsonFileName')">Save JSON</button>
     <button class="btn btn-sm btn-outline-secondary" id="showButton" onClick="viewJson(this)">View JSON</button>
     
   </div>
@@ -29,8 +29,9 @@
   </div>
   <script>
 
-    startUrl ="https://carstenbund.com/gallery/paintings/image_urls.json";
-    saveUrl ="https://carstenbund.com/cgibin/gallery/save_json.py";
+    var jsonData = [];
+    var startUrl ="https://carstenbund.com/gallery/paintings/image_urls.json";
+    var APIEndpoint ="https://carstenbund.com/cgi-bin/gallery/save_json_file.py";
 
     const actionUrl = getQueryParam('actionUrl');
     const jsonFile = actionUrl || startUrl;
@@ -44,7 +45,7 @@
     }
     // Load images when the document is ready
     $(document).ready(function() {
-      loadImages(startUrl);
+      jsonData = loadImages(startUrl);
       initPage();
     });
   </script>

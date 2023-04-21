@@ -5,13 +5,9 @@ function getQueryParam(param) {
   return urlParams.get(param);
 }
 
-
-function viewJsonx(){
-  newWindow = window.open("data:text/json," + encodeURIComponent(jsonData),"_blank");
-}
-
 var textareaVisible = false;
 var jsonText;
+
 
 function viewJson(button) {
   if (textareaVisible) {
@@ -68,25 +64,38 @@ function viewJson(button) {
 
 
 
-
-
-
 async function uploadFile(filename) {
   var formData = new FormData();
-  //var jsonData = document.getElementById("output-textarea").value;
-  var data = new Blob([jsonData], {type: 'text/html'});
-  var filename = jsonUrl;
-  var filename = jsonUrl.substring(jsonUrl.lastIndexOf('/')+1);
-  formData.append("filename", data, filename);
+  var jsonText = JSON.stringify(jsonData, null, 2);
+  //var data = new Blob([jsonText], { type: 'application/json' });
+  var data = new Blob([jsonText], { type: 'text/plain' });
+  formData.append('filename', data, filename);
+
   await fetch(APIEndpoint, {
-    method: "POST", 
-    body: formData
-  }).then(res => console.log(res));
+    method: 'POST',
+    body: formData,
+  })
+    .then(async (res) => {
+      console.log(res)
+      const responseText = await res.text();
+      if (res.ok) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(responseText, 'text/html');
+        const message = doc.querySelector('p').textContent;
+        console.log(message);
+      } else {
+        console.error(`Error ${res.status}: ${responseText}`);
+      }
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
 }
 
 
 async function save_from_form(formElement){
   let filename=document.getElementById(formElement).value;
+  filename = filename.substring(filename.lastIndexOf('/')+1);
   await uploadFile(filename);
 }
 
@@ -109,11 +118,21 @@ function loadNewJson(actionUrl) {
   }
 }
 
-  let jsonData;
 
 function loadJson(file, callback) {
-  // Replace ./data.json with your JSON feed
-  fetch(file)
+  // Add a unique query parameter to bypass the cache
+  var timestamp = new Date().getTime(); // Get the current timestamp
+  var url = file + (file.indexOf('?') > -1 ? '&' : '?') + "nocache=" + timestamp;
+
+  // Replace file with your JSON feed
+  fetch(url, {
+    method: 'GET',
+    headers: {
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache",
+      "Expires": "0"
+    }
+  })
   .then((response) => {
     return response.json();
   })
@@ -128,7 +147,6 @@ function loadJson(file, callback) {
 }
 
 function loadImages(jsonFile) {
-
   loadJson(jsonFile, function (fetchedData) {
     jsonData = fetchedData;
 
@@ -138,9 +156,11 @@ function loadImages(jsonFile) {
           <div class="card mb-4 box-shadow">
             <img class="card-img-top image-thumbnail" src="${item.url}" alt="${item.title}">
             <div class="card-body">
-              <h5 class="card-title editable" contentEditable="true">${item.title}</h5>
-              <p class="card-text editable" contentEditable="true">${item.description || ''}</p>
-              <p class="card-text editable" contentEditable="true">${item.actionUrl || ''}</p>
+              <h5 class="card-title editable" contentEditable="true" id="title">${item.title}</h5>
+              <p class="card-text editable" contentEditable="true" id="description">${item.description || ''}</p>
+              <p class="card-text editable" contentEditable="true" id="folder">${item.folder || ''}</p>
+              <p class="card-text editable" contentEditable="true" id="actionUrl">${item.actionUrl || ''}</p>
+                        
               <div class="d-flex justify-content-between align-items-center">
               ${
                     item.actionUrl.endsWith('.json')
@@ -163,13 +183,13 @@ function loadImages(jsonFile) {
       handle: '.card',
       opacity: 0.5,
       update: function (event, ui) {
-        updateJsonOrder(jsonData);
+        jsonData = updateJsonOrder(jsonData);
       },
     });
     $("#image-grid").on("click", ".editable", function () {
       var element = $(this);
       var uuid = element.closest(".draggable").data("uuid");
-      var field = element.hasClass("card-title") ? "title" : "description";
+      var field = element.attr("id");
       var oldValue = element.text();
       
       element.hide();
@@ -197,7 +217,6 @@ function loadImages(jsonFile) {
         }
       });
     });
-
   });
 }
 
@@ -228,13 +247,6 @@ function updateJsonOrder(jsonData) {
   // Replace the original jsonData with the reordered version
   jsonData = orderedJsonData;
   console.log("update:", JSON.stringify(jsonData, null, 2));
-}
-
-
-function saveJson(jsonData, saveUrl) {
-  var xmlhttp = new XMLHttpRequest();
-  xmlhttp.open('POST', saveUrl, true);
-  xmlhttp.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-  xmlhttp.send(JSON.stringify(jsonData,null,2));
+  return jsonData;
 }
 
